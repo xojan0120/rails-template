@@ -51,14 +51,14 @@ empty_directory "spec/support"
 # spec/supportディレクトリを読み込むよう設定
 # なぜか第2引数の挿入文字列の頭に\nを入れないと挿入されない。謎。
 inject_into_file "spec/rails_helper.rb",
-                  after: "# Dir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }\n" do
-                  "\nDir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }\n"
+                  after: "# Dir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }" do
+                  "\nDir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }"
                   end
 
 # Capybaraライブラリを読み込むよう設定
 inject_into_file "spec/rails_helper.rb",
-                  after: "# Add additional requires below this line. Rails is not loaded until this point!\n" do
-                  "require 'capybara/rspec'\n"
+                  after: "# Add additional requires below this line. Rails is not loaded until this point!" do
+                  "\nrequire 'capybara/rspec'"
                   end
 
 # Capybara用設定ファイル作成
@@ -72,6 +72,13 @@ RSpec.configure do |config|
   end
 end
 EOS
+
+# focusタグを有効にする
+inject_into_file "spec/spec_helper.rb",
+                  after: "# with RSpec, but feel free to customize to your heart's content." do
+                  "\nconfig.filter_run_when_matching :focus"
+                  end
+
 
 # ----------------------------------------------------------------
 # Guard初期設定
