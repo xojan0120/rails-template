@@ -12,7 +12,7 @@ gem 'mini_magick',             '4.7.0'
 gem 'slim-rails'
 gem 'will_paginate',           '3.1.6'
 
-gem_group :test do
+gem_group :development, :test do
   gem 'chromedriver-helper'
   gem 'factory_bot_rails', '~>4.10.0'
   gem 'guard', '2.13.0'
