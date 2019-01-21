@@ -30,11 +30,8 @@ run "bundle install"
 generate "rspec:install"
 
 # ジェネレータ設定
-application <<-APPEND_APPLICATION
-config.generators do |g|
-  g.test_framework :rspec, fixtures: true, view_specs: false, helper_specs: false, routing_specs: false, request_specs: false
-end
-APPEND_APPLICATION
+environment "config.generators do |g| g.test_framework :rspec, view_specs: false, helper_specs: false, routing_specs: false, controller_specs: false end"
+environment "config.generators.fixture_replacement :factory_bot, dir: 'spec/factories'"
 
 # 出力形式をドキュメント形式に変更
 inject_into_file ".rspec",
