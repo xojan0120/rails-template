@@ -37,8 +37,9 @@ environment "config.generators.fixture_replacement :factory_bot, dir: 'spec/fact
 
 # 出力形式をドキュメント形式に変更
 inject_into_file ".rspec",
-                 after: "--require spec_helper\n" do
-                 "--format documentation\n"
+                 after: "--require spec_helper\n" do <<~EOS
+                 --format documentation
+                 EOS
                  end
 
 # system spec用ディレクトリ作成
@@ -48,34 +49,42 @@ empty_directory "spec/system"
 empty_directory "spec/support"
 
 # spec/supportディレクトリを読み込むよう設定
-# なぜか第2引数の挿入文字列の頭に\nを入れないと挿入されない。謎。
+# なぜか挿入文字列の頭に\nを入れないと挿入されない。謎。
 inject_into_file "spec/rails_helper.rb",
-                  after: "# Dir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }" do
-                  "\nDir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }"
+                  after: "# Dir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }" do <<~EOS
+
+                  Dir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }
+                  EOS
                   end
 
 # Capybaraライブラリを読み込むよう設定
+# なぜか挿入文字列の頭に\nを入れないと挿入されない。謎。
 inject_into_file "spec/rails_helper.rb",
-                  after: "# Add additional requires below this line. Rails is not loaded until this point!" do
-                  "\nrequire 'capybara/rspec'"
+                  after: "# Add additional requires below this line. Rails is not loaded until this point!" do <<~EOS
+
+                  require 'capybara/rspec'
+                  EOS
                   end
 
 # Capybara用設定ファイル作成
-create_file "spec/support/capybara.rb", <<EOS
-RSpec.configure do |config|
-  config.before(:each, type: :system) do
-    driven_by :rack_test
+create_file "spec/support/capybara.rb", <<~EOS
+  RSpec.configure do |config|
+    config.before(:each, type: :system) do
+      driven_by :rack_test
+    end
+    config.before(:each, type: :system, js: true) do
+      driven_by :selenium_chrome_headless
+    end
   end
-  config.before(:each, type: :system, js: true) do
-    driven_by :selenium_chrome_headless
-  end
-end
 EOS
 
 # focusタグを有効にする
+# なぜか挿入文字列の頭に\nを入れないと挿入されない。謎。
 inject_into_file "spec/spec_helper.rb",
-                  after: "# with RSpec, but feel free to customize to your heart's content." do
-                  "\nconfig.filter_run_when_matching :focus"
+                  after: "# with RSpec, but feel free to customize to your heart's content." do <<~EOS
+
+                  config.filter_run_when_matching :focus
+                  EOS
                   end
 
 
@@ -87,50 +96,70 @@ run "bin/bundle exec guard init rspec"
 # ----------------------------------------------------------------
 # rails console設定
 # ----------------------------------------------------------------
-create_file ".irbrc", <<EOS
-IRB.conf[:PROMPT_MODE] = :SIMPLE
-IRB.conf[:AUTO_INDENT_MODE] = false
+create_file ".irbrc", <<~EOS
+  IRB.conf[:PROMPT_MODE] = :SIMPLE
+  IRB.conf[:AUTO_INDENT_MODE] = false
 
-# Hirbを有効化する
-if defined? Rails::Console
-  if defined? Hirb
-    Hirb.enable
+  # Hirbを有効化する
+  if defined? Rails::Console
+    if defined? Hirb
+      Hirb.enable
+    end
   end
-end
 EOS
 
 # ----------------------------------------------------------------
 # jquery設定
 # ----------------------------------------------------------------
-inject_into_file "app/assets/javascripts/application.js",
-                 after: "//= require rails-ujs\n" do
-                 "//= require jquery\n"
+application_js = "app/assets/javascripts/application.js"
+inject_into_file application_js,
+                 after: "//= require rails-ujs\n" do <<~EOS
+                 //= require jquery
+                 EOS
                  end
 
 # ----------------------------------------------------------------
 # bootstrap css設定
 # ----------------------------------------------------------------
-application_css = "app/assets/stylesheets/application.css"
+application_css  = "app/assets/stylesheets/application.css"
 application_scss = "app/assets/stylesheets/application.css.scss"
 File.rename(application_css, application_scss)
 
 inject_into_file application_scss,
-                 after: " */\n" do
-                 %(@import "bootstrap-sprockets";\n@import "bootstrap";\n)
+                 after: " */\n" do <<~EOS
+                 @import "bootstrap-sprockets";
+                 @import "bootstrap";
+                 EOS
                  end
 
 # ----------------------------------------------------------------
 # bootstrap js設定
 # ----------------------------------------------------------------
-inject_into_file "app/assets/javascripts/application.js",
-                 after: "//= require jquery\n" do
-                 "//= require bootstrap\n"
+inject_into_file application_js,
+                 after: "//= require jquery\n" do <<~EOS
+                 //= require bootstrap
+                 EOS
                  end
 
 # ----------------------------------------------------------------
 # 既存erb→slimへ変換
 # ----------------------------------------------------------------
 run "bin/bundle exec erb2slim -d app/views/layouts/"
+
+# ----------------------------------------------------------------
+# Config初期設定
+# ----------------------------------------------------------------
+generate "config:install"
+
+# ----------------------------------------------------------------
+# .gitignore設定追加
+# ----------------------------------------------------------------
+inject_into_file ".gitignore",
+                  after: ".byebug_history\n" do <<~EOS
+                  /spring/*.pid
+                  *.swp
+                  EOS
+                  end
 
 # ----------------------------------------------------------------
 # git初期化
