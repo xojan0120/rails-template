@@ -100,7 +100,15 @@ end
 EOS
 
 # ----------------------------------------------------------------
-# bootstrap設定
+# jquery設定
+# ----------------------------------------------------------------
+inject_into_file "app/assets/javascripts/application.js",
+                 after: "//= require rails-ujs\n" do
+                 "//= require jquery\n"
+                 end
+
+# ----------------------------------------------------------------
+# bootstrap css設定
 # ----------------------------------------------------------------
 application_css = "app/assets/stylesheets/application.css"
 application_scss = "app/assets/stylesheets/application.css.scss"
@@ -108,8 +116,15 @@ File.rename(application_css, application_scss)
 
 inject_into_file application_scss,
                  after: " */\n" do
-                 "--format documentation\n"
                  %(@import "bootstrap-sprockets";\n@import "bootstrap";\n)
+                 end
+
+# ----------------------------------------------------------------
+# bootstrap js設定
+# ----------------------------------------------------------------
+inject_into_file "app/assets/javascripts/application.js",
+                 after: "//= require jquery\n" do
+                 "//= require bootstrap\n"
                  end
 
 # ----------------------------------------------------------------
