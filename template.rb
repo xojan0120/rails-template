@@ -19,6 +19,8 @@ gem_group :development, :test do
   gem 'guard-rspec', require: false
   gem 'rspec-rails', '~>3.8.0'
   gem 'spring-commands-rspec'
+  gem 'hirb'
+  gem 'hirb-unicode'
 end
 
 run "bundle install"
@@ -81,6 +83,39 @@ inject_into_file "spec/spec_helper.rb",
 # Guard初期設定
 # ----------------------------------------------------------------
 run "bin/bundle exec guard init rspec"
+
+# ----------------------------------------------------------------
+# rails console設定
+# ----------------------------------------------------------------
+create_file ".irbrc", <<EOS
+IRB.conf[:PROMPT_MODE] = :SIMPLE
+IRB.conf[:AUTO_INDENT_MODE] = false
+
+# Hirbを有効化する
+if defined? Rails::Console
+  if defined? Hirb
+    Hirb.enable
+  end
+end
+EOS
+
+# ----------------------------------------------------------------
+# bootstrap設定
+# ----------------------------------------------------------------
+application_css = "app/assets/stylesheets/application.css"
+application_scss = "app/assets/stylesheets/application.css.scss"
+File.rename(application_css, application_scss)
+
+inject_into_file application_scss,
+                 after: " */\n" do
+                 "--format documentation\n"
+                 %(@import "bootstrap-sprockets";\n@import "bootstrap";\n)
+                 end
+
+# ----------------------------------------------------------------
+# 既存erb→slimへ変換
+# ----------------------------------------------------------------
+run "bin/bundle exec erb2slim -d app/views/layouts/"
 
 # ----------------------------------------------------------------
 # git初期化
