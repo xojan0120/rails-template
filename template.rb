@@ -87,6 +87,48 @@ inject_into_file "spec/spec_helper.rb",
                   EOS
                   end
 
+# 処理を待つ系のサポートモジュール作成
+create_file "spec/support/wait_for_ajax.rb", <<~EOS
+  module WaitForAjax
+    # ajaxが完了するまで待つ
+    def wait_for_ajax(wait_time = Capybara.default_max_wait_time)
+      Timeout.timeout(wait_time) do
+        loop until finished_all_ajax_requests?
+      end
+      yield
+    end
+
+    def finished_all_ajax_requests?
+      page.evaluate_script('jQuery.active').zero?
+    end
+  end
+  RSpec.configure do |config|
+    config.include WaitForAjax, type: :system
+  end
+EOS
+create_file "spec/support/wait_for_css.rb", <<~EOS
+  module WaitForCss
+    # cssが表示されるまで待つ
+    def wait_for_css_appear(selector, wait_time = Capybara.default_max_wait_time)
+      Timeout.timeout(wait_time) do
+        loop until has_css?(selector)
+      end
+      yield
+    end
+
+    # cssが表示されなくなるまで待つ
+    def wait_for_css_disappear(selector, wait_time = Capybara.default_max_wait_time)
+      Timeout.timeout(wait_time) do
+        loop until has_no_css?(selector)
+      end
+      yield
+    end
+  end
+
+  RSpec.configure do |config|
+    config.include WaitForCss, type: :system
+  end
+EOS
 
 # ----------------------------------------------------------------
 # Guard初期設定
