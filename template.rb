@@ -23,6 +23,10 @@ gem_group :development, :test do
   gem 'hirb-unicode'
 end
 
+gem_group :test do
+  gem 'shoulda-matchers', git: 'https://github.com/thoughtbot/shoulda-matchers.git', branch: 'rails-5'
+end
+
 run "bundle install"
 
 # ----------------------------------------------------------------
@@ -84,6 +88,20 @@ inject_into_file "spec/spec_helper.rb",
                   after: "# with RSpec, but feel free to customize to your heart's content." do <<~EOS
 
                   config.filter_run_when_matching :focus
+                  EOS
+                  end
+
+# Shoulda Matchers設定
+# なぜか挿入文字列の頭に\nを入れないと挿入されない。謎。
+inject_into_file "spec/rails_helper.rb",
+                  after: %(  # config.filter_gems_from_backtrace("gem name")\nend\n) do <<~EOS
+
+                  Shoulda::Matchers.configure do |config|
+                    config.integrate do |with|
+                      with.test_framework :rspec
+                      with.library :rails
+                    end
+                  end
                   EOS
                   end
 
