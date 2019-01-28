@@ -11,6 +11,7 @@ gem 'jquery-rails',            '4.3.1'
 gem 'mini_magick',             '4.7.0'
 gem 'slim-rails'
 gem 'will_paginate',           '3.1.6'
+gem 'faker',                   '1.7.3'
 
 gem_group :development, :test do
   gem 'chromedriver-helper'
