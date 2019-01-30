@@ -114,7 +114,7 @@ create_file "spec/support/wait_for_ajax.rb", <<~EOS
       Timeout.timeout(wait_time) do
         loop until finished_all_ajax_requests?
       end
-      yield
+      yield if block_given?
     end
 
     def finished_all_ajax_requests?
@@ -125,6 +125,7 @@ create_file "spec/support/wait_for_ajax.rb", <<~EOS
     config.include WaitForAjax, type: :system
   end
 EOS
+
 create_file "spec/support/wait_for_css.rb", <<~EOS
   module WaitForCss
     # cssが表示されるまで待つ
@@ -132,7 +133,7 @@ create_file "spec/support/wait_for_css.rb", <<~EOS
       Timeout.timeout(wait_time) do
         loop until has_css?(selector)
       end
-      yield
+      yield if block_given?
     end
 
     # cssが表示されなくなるまで待つ
@@ -140,7 +141,7 @@ create_file "spec/support/wait_for_css.rb", <<~EOS
       Timeout.timeout(wait_time) do
         loop until has_no_css?(selector)
       end
-      yield
+      yield if block_given?
     end
   end
 
