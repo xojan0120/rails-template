@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------
-# gem追加&インストール
+# gem追加&置換え&インストール
 # ----------------------------------------------------------------
 gem 'bootstrap-sass',          '3.3.7'
 gem 'bootstrap-will_paginate', '1.0.0'
@@ -27,6 +27,8 @@ end
 gem_group :test do
   gem 'shoulda-matchers', git: 'https://github.com/thoughtbot/shoulda-matchers.git', branch: 'rails-5'
 end
+
+gsub_file 'Gemfile', %r(gem 'sqlite3'), "gem 'sqlite3', '~> 1.3.0'"
 
 run "bundle install"
 
