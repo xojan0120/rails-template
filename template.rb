@@ -1,17 +1,18 @@
 # ----------------------------------------------------------------
 # gem追加&置換え&インストール
 # ----------------------------------------------------------------
-gem 'bootstrap-sass',          '3.3.7'
+gem 'bootstrap-sass',          '3.4.1'
 gem 'bootstrap-will_paginate', '1.0.0'
 gem 'carrierwave',             '1.2.2'
 gem 'config',                  '1.7.1'
+gem 'dotenv-rails'
+gem 'faker',                   '1.7.3'
 gem 'high_voltage'
 gem 'html2slim'
 gem 'jquery-rails',            '4.3.1'
 gem 'mini_magick',             '4.7.0'
 gem 'slim-rails'
 gem 'will_paginate',           '3.1.6'
-gem 'faker',                   '1.7.3'
 
 gem_group :development, :test do
   gem 'chromedriver-helper'
@@ -206,6 +207,14 @@ inject_into_file application_js,
                  end
 
 # ----------------------------------------------------------------
+# dotenv設定
+# ----------------------------------------------------------------
+create_file ".env", <<~EOS
+# Example
+# VAR = 'something' # ENV['VAR'] => 'something'
+EOS
+
+# ----------------------------------------------------------------
 # 既存erb→slimへ変換
 # ----------------------------------------------------------------
 run "bin/bundle exec erb2slim -d app/views/layouts/"
@@ -222,6 +231,7 @@ inject_into_file ".gitignore",
                   after: ".byebug_history\n" do <<~EOS
                   /spring/*.pid
                   *.swp
+                  .env
                   EOS
                   end
 
