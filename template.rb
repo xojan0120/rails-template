@@ -1,4 +1,11 @@
 # ----------------------------------------------------------------
+# git初期化
+# ----------------------------------------------------------------
+git :init
+git add: "."
+git commit: %Q{ -m 'Initial commit' }
+
+# ----------------------------------------------------------------
 # gem追加&置換え&インストール
 # ----------------------------------------------------------------
 gem 'bootstrap-sass',          '3.4.1'
@@ -42,6 +49,7 @@ generate "rspec:install"
 # ジェネレータ設定
 environment "config.generators do |g| g.test_framework :rspec, view_specs: false, helper_specs: false, routing_specs: false, controller_specs: false end"
 environment "config.generators.fixture_replacement :factory_bot, dir: 'spec/factories'"
+environment "config.time_zone = 'Tokyo'"
 
 # 出力形式をドキュメント形式に変更
 inject_into_file ".rspec",
@@ -236,13 +244,12 @@ inject_into_file ".gitignore",
                   end
 
 # ----------------------------------------------------------------
-# git初期化
+# template適用後
 # ----------------------------------------------------------------
 # gemのバンドルとbinstub生成の完了後に実行したいコールバックを登録
 after_bundle do
-  git :init
   git add: "."
-  git commit: %Q{ -m 'Initial commit' }
+  git commit: %Q{ -m 'After template applying' }
 
   # 最後にspringを止めて置かないとなぜかrails consoleが立ち上がらない
   run "bin/spring stop"
