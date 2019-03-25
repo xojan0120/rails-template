@@ -8,21 +8,11 @@ git commit: %Q{ -m 'Initial commit' }
 # ----------------------------------------------------------------
 # gem追加&置換え&インストール
 # ----------------------------------------------------------------
-gem 'bootstrap-sass',          '3.4.1'
-gem 'bootstrap-will_paginate', '1.0.0'
-gem 'carrierwave',             '1.2.2'
 gem 'config',                  '1.7.1'
 gem 'dotenv-rails'
 gem 'faker',                   '1.7.3'
-gem 'high_voltage'
-gem 'html2slim'
-gem 'jquery-rails',            '4.3.1'
-gem 'mini_magick',             '4.7.0'
-gem 'slim-rails'
-gem 'will_paginate',           '3.1.6'
 
 gem_group :development, :test do
-  gem 'chromedriver-helper'
   gem 'factory_bot_rails', '~>4.10.0'
   gem 'guard', '2.13.0'
   gem 'guard-rspec', require: false
@@ -73,27 +63,6 @@ inject_into_file "spec/rails_helper.rb",
                   EOS
                   end
 
-# Capybaraライブラリを読み込むよう設定
-# なぜか挿入文字列の頭に\nを入れないと挿入されない。謎。
-inject_into_file "spec/rails_helper.rb",
-                  after: "# Add additional requires below this line. Rails is not loaded until this point!" do <<~EOS
-
-                  require 'capybara/rspec'
-                  EOS
-                  end
-
-# Capybara用設定ファイル作成
-create_file "spec/support/capybara.rb", <<~EOS
-  RSpec.configure do |config|
-    config.before(:each, type: :system) do
-      driven_by :rack_test
-    end
-    config.before(:each, type: :system, js: true) do
-      driven_by :selenium_chrome_headless
-    end
-  end
-EOS
-
 # focusタグを有効にする
 # なぜか挿入文字列の頭に\nを入れないと挿入されない。謎。
 inject_into_file "spec/spec_helper.rb",
@@ -117,50 +86,6 @@ inject_into_file "spec/rails_helper.rb",
                   EOS
                   end
 
-# 処理を待つ系のサポートモジュール作成
-create_file "spec/support/wait_for_ajax.rb", <<~EOS
-  module WaitForAjax
-    # ajaxが完了するまで待つ
-    def wait_for_ajax(wait_time = Capybara.default_max_wait_time)
-      Timeout.timeout(wait_time) do
-        loop until finished_all_ajax_requests?
-      end
-      yield if block_given?
-    end
-
-    def finished_all_ajax_requests?
-      page.evaluate_script('jQuery.active').zero?
-    end
-  end
-  RSpec.configure do |config|
-    config.include WaitForAjax, type: :system
-  end
-EOS
-
-create_file "spec/support/wait_for_css.rb", <<~EOS
-  module WaitForCss
-    # cssが表示されるまで待つ
-    def wait_for_css_appear(selector, wait_time = Capybara.default_max_wait_time)
-      Timeout.timeout(wait_time) do
-        loop until has_css?(selector)
-      end
-      yield if block_given?
-    end
-
-    # cssが表示されなくなるまで待つ
-    def wait_for_css_disappear(selector, wait_time = Capybara.default_max_wait_time)
-      Timeout.timeout(wait_time) do
-        loop until has_no_css?(selector)
-      end
-      yield if block_given?
-    end
-  end
-
-  RSpec.configure do |config|
-    config.include WaitForCss, type: :system
-  end
-EOS
-
 # ----------------------------------------------------------------
 # Guard初期設定
 # ----------------------------------------------------------------
@@ -182,50 +107,12 @@ create_file ".irbrc", <<~EOS
 EOS
 
 # ----------------------------------------------------------------
-# jquery設定
-# ----------------------------------------------------------------
-application_js = "app/assets/javascripts/application.js"
-inject_into_file application_js,
-                 after: "//= require rails-ujs\n" do <<~EOS
-                 //= require jquery
-                 EOS
-                 end
-
-# ----------------------------------------------------------------
-# bootstrap css設定
-# ----------------------------------------------------------------
-application_css  = "app/assets/stylesheets/application.css"
-application_scss = "app/assets/stylesheets/application.css.scss"
-File.rename(application_css, application_scss)
-
-inject_into_file application_scss,
-                 after: " */\n" do <<~EOS
-                 @import "bootstrap-sprockets";
-                 @import "bootstrap";
-                 EOS
-                 end
-
-# ----------------------------------------------------------------
-# bootstrap js設定
-# ----------------------------------------------------------------
-inject_into_file application_js,
-                 after: "//= require jquery\n" do <<~EOS
-                 //= require bootstrap
-                 EOS
-                 end
-
-# ----------------------------------------------------------------
 # dotenv設定
 # ----------------------------------------------------------------
 create_file ".env", <<~EOS
 # Example
 # VAR = 'something' # ENV['VAR'] => 'something'
 EOS
-
-# ----------------------------------------------------------------
-# 既存erb→slimへ変換
-# ----------------------------------------------------------------
-run "bin/bundle exec erb2slim -d app/views/layouts/"
 
 # ----------------------------------------------------------------
 # Config初期設定
@@ -240,7 +127,6 @@ inject_into_file ".gitignore",
                   /spring/*.pid
                   *.swp
                   .env
-                  /vendor/bundle
                   EOS
                   end
 
